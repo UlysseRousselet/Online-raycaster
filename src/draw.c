@@ -44,6 +44,7 @@ void draw_2d_debug(sfRenderWindow *window, env *env, float distance_x, float dis
     sfConvexShape_setPoint(env->player->line_direction_player_test, 2, player_pos);
     sfConvexShape_setPoint(env->player->line_direction_player_test, 3, player_pos);
     sfRenderWindow_drawConvexShape(window, env->player->line_direction_player_test, NULL);
+
 }
 
 void draw_3d(sfRenderWindow *window, env *env, float distance, int index) {
@@ -72,19 +73,58 @@ void draw_3d(sfRenderWindow *window, env *env, float distance, int index) {
     sfRenderWindow_drawConvexShape(window, env->wall_3d, NULL);
 }
 
+void draw_3d_other_player(sfRenderWindow *window, env *env, float distance, int index) {
+    if (distance < 0)
+        distance *= -1;
+    distance = 3000 / distance; 
+    if (distance > 500)
+        distance = 500;
+    sfVector2f other_player_pos = {328 * (distance / 100000), 448 * (distance / 100000)};
+    sfSprite_setScale(env->other_Player->sprite, other_player_pos);
+    other_player_pos.x = (index + 45) * 22;
+    other_player_pos.y = 540 - (1 * (distance / 2));
+    sfSprite_setPosition(env->other_Player->sprite, other_player_pos);
+    sfRenderWindow_drawSprite(window, env->other_Player->sprite, NULL);
+}
+
+
+int check_collision_other_player(env *env, float x, float y)
+{
+    
+    if (sqrt(env->other_Player->x - x) * (env->other_Player->x - x) < 1 && sqrt(env->other_Player->y - y) * (env->other_Player->y - y) < 1) {
+        return 1;
+    }
+    return 0;
+}
+
 void raycast_draw(sfRenderWindow *window, env *env)
 {
     float distance_x = 0;
     float distance_y = 0;
+    int is_visible = 0;
+    int end = 0;
     for (int i = -45; i < 46; i++) {
-        for (int y = 1; y < 500; y++) {
+        for (int y = 1; y < env->player->draw_distance; y++) {
             distance_x = env->player->x + cos((env->player->angle + i) / (180/PI)) * y;
             distance_y = env->player->y + sin((env->player->angle + i) / (180/PI)) * y;
+            
             if (check_collision(env, distance_x, distance_y)) {
                 draw_2d_debug(window, env, distance_x, distance_y);
                 draw_3d(window, env, sqrt((env->player->x - distance_x) * (env->player->x - distance_x) + (env->player->y - distance_y) * (env->player->y - distance_y)), i);
-                break;
+                end = 1;
+            }
+            if (check_collision_other_player(env, distance_x, distance_y)) {
+                env->other_Player->distance_x = distance_x;
+                env->other_Player->distance_y = distance_y;
+                env->other_Player->i = i;
+                is_visible = 1;
+            }
+            if (end == 1) {
+                end = 0;
+               break;
             }
         }
     }
+    if (is_visible)
+        draw_3d_other_player(window, env, sqrt((env->player->x - env->other_Player->distance_x) * (env->player->x - env->other_Player->distance_x) + (env->player->y - env->other_Player->distance_y) * (env->player->y - env->other_Player->distance_y)), env->other_Player->i);
 }

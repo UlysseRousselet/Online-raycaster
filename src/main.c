@@ -10,15 +10,23 @@
 void game_loop(sfRenderWindow *window, sfEvent event, env *env, int socketClient)
 {
     while (sfRenderWindow_isOpen(window)) {
+        sfClock_restart(env->clock);
         double x_and_y[2] = {env->player->x, env->player->y};
         send(socketClient, &x_and_y, sizeof(x_and_y), 0);
-        recv(socketClient, &env->player->x_and_y, sizeof(env->player->x_and_y), 0);
-        //printf("x = %f, y = %f\n", env->player->x_and_y[0], env->player->x_and_y[1]);
+        recv(socketClient, &x_and_y, sizeof(x_and_y), 0);
+        env->other_Player->x = x_and_y[0];
+        env->other_Player->y = x_and_y[1];
+        //printf("%lf %lf\n", env->other_Player->x, env->player->x);
         event_fct(window, event, env);
         sfRenderWindow_clear(window, sfBlack);
-        debug_2d_draw(window, env);
+        //debug_2d_draw(window, env);
         raycast_draw(window, env);
         sfRenderWindow_display(window);
+        sfTime time = sfClock_getElapsedTime(env->clock);
+        if (sfTime_asMicroseconds(time) > 30000) {
+            env->player->draw_distance -= 20;
+        } else if (env->player->draw_distance < 500)
+            env->player->draw_distance += 20;
     }
 }
 
@@ -29,7 +37,8 @@ int main(void)
     sfEvent event;
     env env;
     Player player;
-    set_up(&env, &player);
+    Other_Player other_Player;
+    set_up(&env, &player, &other_Player);
     /////////////
     int socketClient = socket(AF_INET, SOCK_STREAM, 0);
     

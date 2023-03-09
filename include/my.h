@@ -36,20 +36,32 @@ typedef struct Player {
     int reculer;
     int droite;
     int gauche;
-    double x_and_y[2];
+    int draw_distance;
     sfCircleShape *point_player_test;
     sfConvexShape *line_direction_player_test;
     
 } Player;
 
+typedef struct Other_Player {
+    double x;
+    double y;
+    sfTexture *texture;
+    sfSprite *sprite;
+    float distance_x;
+    float distance_y;
+    float i;
+} Other_Player;
+
 typedef struct env {
     Player *player;
     sfVector2i middle_of_screen;
+    Other_Player *other_Player;
     char **map;
     int nbr_of_wall;
     sfRectangleShape *wall_rect_test;
     sfConvexShape *wall_3d;
     sfVector2f *wall_tab;
+    sfClock *clock;
 } env;
 
 int my_printf(const char *format, ...);
@@ -110,7 +122,7 @@ void str_e2(const char *format, va_list list, int *i, int *count);
 void str_float2(const char *format, va_list list, int *i, int *count);
 void str_m(const char *format, va_list list, int *i, int *count);
 char **malloc_2d_array(int y, int x);
-void set_up(env *env, Player *player);
+void set_up(env *env, Player *player, Other_Player *other_Player);
 void event_fct(sfRenderWindow *window, sfEvent event, env *env);
 char **file_into_2d_array(char *filepath);
 char **my_str_to_word_array(char *str, char delimiter);

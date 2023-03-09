@@ -24,7 +24,7 @@ void set_up_wall(env *env)
     }
 }
 
-void set_up(env *env, Player *player)
+void set_up(env *env, Player *player, Other_Player *other_Player)
 {    
     player->x = 40;
     player->y = 40;
@@ -36,12 +36,21 @@ void set_up(env *env, Player *player)
     player->droite = 0;
     player->gauche = 0;
     player->reculer = 0;
+    player->draw_distance = 300;
+
+    other_Player->x = 40;
+    other_Player->y = 40;
+    other_Player->texture = sfTexture_createFromFile("assets/Doom_guy.png", NULL);
+    other_Player->sprite = sfSprite_create();
+    sfSprite_setTexture(other_Player->sprite, other_Player->texture, sfTrue);
+    env->other_Player = other_Player;
 
     env->map = file_into_2d_array("map.txt");
     env->nbr_of_wall = get_nbr_wall(env->map);
     set_up_wall(env);
     env->wall_3d = sfConvexShape_create();
     sfConvexShape_setPointCount(env->wall_3d, 4);
+    env->clock = sfClock_create();
 
     env->wall_rect_test = sfRectangleShape_create();
     sfRectangleShape_setFillColor(env->wall_rect_test, sfGreen);
