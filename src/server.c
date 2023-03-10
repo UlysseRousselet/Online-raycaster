@@ -11,7 +11,7 @@ int main(void)
 {
     int socketServer = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in addresseServer;
-    addresseServer.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addresseServer.sin_addr.s_addr = inet_addr("192.168.0.32");
     addresseServer.sin_family = AF_INET;
     addresseServer.sin_port = htons(30000);
 
